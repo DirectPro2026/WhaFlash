@@ -1,0 +1,1 @@
+import{s}from"./v_7_4_3_81_b40023ff-89d0-4f36-93d0-58e23d665ee24.js";import{c as r}from"./v_7_4_3_81_b40023ff-89d0-4f36-93d0-58e23d665ee22.js";const o=r()(s(e=>({active:!1,setActive:t=>e({active:t})})));export{o as u};
