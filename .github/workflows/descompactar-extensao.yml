@@ -22,28 +22,38 @@ jobs:
         run: |
           set -e
 
-          ZIP_FILE="ghbmnnjooekpmoecnnnilnnbdlolhkhi.zip"
+          # Procura automaticamente qualquer ZIP enviado para a raiz.
+          ZIP_FILE=$(find . -maxdepth 1 -type f -name '*.zip' -printf '%f\n' | head -n 1)
 
-          if [ ! -f "$ZIP_FILE" ]; then
-            echo "ZIP não encontrado: $ZIP_FILE"
+          if [ -z "$ZIP_FILE" ]; then
+            if [ -f "manifest.json" ]; then
+              echo "Nenhum ZIP novo encontrado. A extensão já está descompactada."
+              exit 0
+            fi
+            echo "ERRO: nenhum arquivo ZIP encontrado na raiz do repositório."
             exit 1
           fi
 
+          echo "ZIP encontrado: $ZIP_FILE"
           echo "Descompactando $ZIP_FILE..."
 
+          rm -rf extracted
           mkdir -p extracted
           unzip -o "$ZIP_FILE" -d extracted
 
-          # Se o ZIP tiver uma única pasta na raiz,
-          # move o conteúdo dessa pasta para a raiz do repositório.
-          ITEMS=(extracted/*)
+          # Localiza o diretório que realmente contém o manifest.json.
+          MANIFEST=$(find extracted -type f -name 'manifest.json' | head -n 1)
 
-          if [ "${#ITEMS[@]}" -eq 1 ] && [ -d "${ITEMS[0]}" ]; then
-            echo "Encontrada pasta interna: ${ITEMS[0]}"
-            cp -a "${ITEMS[0]}"/. .
-          else
-            cp -a extracted/. .
+          if [ -z "$MANIFEST" ]; then
+            echo "ERRO: manifest.json não encontrado dentro do ZIP."
+            exit 1
           fi
+
+          EXT_DIR=$(dirname "$MANIFEST")
+          echo "Diretório da extensão: $EXT_DIR"
+
+          # Copia os arquivos da extensão para a raiz do repositório.
+          cp -a "$EXT_DIR"/. .
 
           rm -rf extracted
           rm -f "$ZIP_FILE"
