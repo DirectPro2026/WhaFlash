@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { syncWhatsAppContacts } from '../core/crm/contactSync';
+import { filterContacts } from '../core/crm/pipeline';
 import { whatsappApi } from '../messaging/whatsappClient';
 import { useCrmStore } from '../storage/crmStore';
 import { Kanban } from './Kanban';
@@ -20,6 +21,7 @@ export function App() {
   const [chats, setChats] = React.useState<ChatSummary[]>([]);
   const [ready, setReady] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
+  const [query, setQuery] = React.useState('');
   const [message, setMessage] = React.useState<string>();
   const [error, setError] = React.useState<string>();
 
@@ -50,6 +52,7 @@ export function App() {
     finally { setBusy(false); }
   }
 
+  const visibleContacts = React.useMemo(() => filterContacts(contacts, query), [contacts, query]);
   const selected = contacts.find((c) => c.id === selectedContactId);
   const totalValue = contacts.reduce((sum, contact) => sum + (contact.value ?? 0), 0);
 
@@ -71,8 +74,16 @@ export function App() {
     {error && <div className="error" role="alert">{error}</div>}
     {message && <div className="success" role="status">{message}</div>}
 
+    <section className="panel search-panel">
+      <label className="search-field">
+        <span>Pesquisar contatos</span>
+        <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nome, telefone, empresa, etiqueta…" />
+      </label>
+      {query && <small>{visibleContacts.length} resultado(s) para “{query}”.</small>}
+    </section>
+
     <Kanban
-      contacts={contacts}
+      contacts={visibleContacts}
       stages={stages}
       onSelect={selectContact}
       onMove={(id, stageId) => { moveContact(id, stageId); setMessage('Contato movido no funil.'); }}
