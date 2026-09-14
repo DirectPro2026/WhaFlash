@@ -15,72 +15,37 @@ export class WhatsAppWebAdapter implements WhatsAppAdapter {
     this.nonce = options.nonce ?? readBridgeNonce();
   }
 
-  setReady(value: boolean): void {
-    this.ready = value;
-  }
+  setReady(value: boolean): void { this.ready = value; }
+  isReady(): boolean { return this.ready; }
 
-  isReady(): boolean {
-    return this.ready;
+  requestStatus(): Promise<WhatsAppActionResults['runtime.status']> {
+    return this.request('runtime.status', {});
   }
+  getChats(): Promise<ChatSummary[]> { return this.request('chats.list', {}); }
+  getContact(id: ContactId): Promise<Contact | null> { return this.request('contacts.get', { id }); }
+  markChatRead(id: ChatId): Promise<void> { return this.request('chats.markRead', { id }); }
+  getProfile(): Promise<WhatsAppProfile> { return this.request('profile.get', {}); }
+  getLabels(): Promise<Label[]> { return this.request('labels.list', {}); }
+  downloadMedia(messageId: string): Promise<unknown> { return this.request('media.download', { messageId }); }
 
-  getChats(): Promise<ChatSummary[]> {
-    return this.request('chats.list', {});
-  }
-
-  getContact(id: ContactId): Promise<Contact | null> {
-    return this.request('contacts.get', { id });
-  }
-
-  markChatRead(id: ChatId): Promise<void> {
-    return this.request('chats.markRead', { id });
-  }
-
-  getProfile(): Promise<WhatsAppProfile> {
-    return this.request('profile.get', {});
-  }
-
-  getLabels(): Promise<Label[]> {
-    return this.request('labels.list', {});
-  }
-
-  downloadMedia(messageId: string): Promise<unknown> {
-    return this.request('media.download', { messageId });
-  }
-
-  private request<A extends WhatsAppAction>(
-    action: A,
-    payload: WhatsAppActionPayloads[A],
-  ): Promise<WhatsAppActionResults[A]> {
+  private request<A extends WhatsAppAction>(action: A, payload: WhatsAppActionPayloads[A]): Promise<WhatsAppActionResults[A]> {
     return new Promise((resolve, reject) => {
       const requestId = crypto.randomUUID();
       const listener = (event: MessageEvent) => {
-        if (event.source !== window) return;
+        if (event.source !== window || event.origin !== window.location.origin) return;
         const data = event.data as Partial<BridgeResponse<A>> | undefined;
-        if (
-          data?.source !== SOURCE ||
-          data.type !== RESPONSE_TYPE ||
-          data.requestId !== requestId ||
-          data.action !== action ||
-          data.nonce !== this.nonce
-        ) return;
-
+        if (data?.source !== SOURCE || data.type !== RESPONSE_TYPE || data.requestId !== requestId || data.action !== action || data.nonce !== this.nonce) return;
         window.removeEventListener('message', listener);
         window.clearTimeout(timer);
         if (data.error) reject(new Error(data.error));
         else resolve(data.result as WhatsAppActionResults[A]);
       };
-
       const timer = window.setTimeout(() => {
         window.removeEventListener('message', listener);
         reject(new Error(`Timeout waiting for WhatsApp action: ${action}`));
       }, this.timeoutMs);
-
-      // Register before postMessage so a synchronous page handler cannot race us.
       window.addEventListener('message', listener);
-      window.postMessage(
-        { source: SOURCE, type: REQUEST_TYPE, requestId, action, payload, nonce: this.nonce },
-        window.location.origin,
-      );
+      window.postMessage({ source: SOURCE, type: REQUEST_TYPE, requestId, action, payload, nonce: this.nonce }, window.location.origin);
     });
   }
 }
