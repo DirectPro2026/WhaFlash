@@ -1,12 +1,26 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 
+function extensionManifest(): Plugin {
+  return {
+    name: 'whaflash-extension-manifest',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'manifest.json',
+        source: readFileSync(resolve(root, 'manifest.json'), 'utf8')
+      });
+    }
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), extensionManifest()],
   build: {
     outDir: 'dist',
     emptyOutDir: true,
