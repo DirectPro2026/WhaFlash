@@ -1,9 +1,8 @@
 import type { WhatsAppAdapter } from '../types';
 import type { Contact as CrmContact } from '../../types/crm';
 
-export interface ContactRepository {
-  upsertContact(contact: CrmContact): void;
-}
+export interface ContactRepository { upsertContact(contact: CrmContact): void; }
+export type ContactSource = Pick<WhatsAppAdapter, 'getChats' | 'getContact'>;
 
 export interface SyncReport {
   discovered: number;
@@ -12,13 +11,9 @@ export interface SyncReport {
   missingContacts: number;
 }
 
-/**
- * Synchronizes the normalized WhatsApp contact surface into the local CRM.
- * It intentionally does not send CRM-only fields back to WhatsApp or any
- * external service.
- */
+/** Synchronizes only the normalized contact surface into the local CRM. */
 export async function syncWhatsAppContacts(
-  adapter: WhatsAppAdapter,
+  adapter: ContactSource,
   repository: ContactRepository,
 ): Promise<SyncReport> {
   const chats = await adapter.getChats();
@@ -29,14 +24,9 @@ export async function syncWhatsAppContacts(
       if (chat.isGroup) report.skippedGroups += 1;
       continue;
     }
-
     const contact = await adapter.getContact(chat.id);
-    if (!contact) {
-      report.missingContacts += 1;
-      continue;
-    }
-
-    const crmContact: CrmContact = {
+    if (!contact) { report.missingContacts += 1; continue; }
+    repository.upsertContact({
       id: contact.id,
       name: contact.name || chat.name,
       phone: contact.phone ?? '',
@@ -45,11 +35,8 @@ export async function syncWhatsAppContacts(
       notes: contact.notes,
       labels: contact.labels,
       updatedAt: Date.now(),
-    };
-
-    repository.upsertContact(crmContact);
+    });
     report.synced += 1;
   }
-
   return report;
 }
