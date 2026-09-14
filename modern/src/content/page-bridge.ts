@@ -1,26 +1,25 @@
 import type { BridgeRequest, BridgeResponse, WhatsAppAction } from '../core/whatsapp/protocol';
 import type { ChatSummary, Contact, Label, WhatsAppProfile } from '../core/types';
+import { createUnavailableRuntime, type WppRuntime } from './runtime-provider';
 
 const SOURCE = 'whaflash-modern' as const;
 const REQUEST_TYPE = 'WHATSAPP_REQUEST' as const;
 const RESPONSE_TYPE = 'WHATSAPP_RESPONSE' as const;
 
-export interface WhatsAppRuntimeProvider {
-  listChats(): Promise<ChatSummary[]>;
-  getContact(id: string): Promise<Contact | null>;
-  markChatRead(id: string): Promise<void>;
-  getProfile(): Promise<WhatsAppProfile>;
-  listLabels(): Promise<Label[]>;
-  downloadMedia(messageId: string): Promise<unknown>;
-}
+const runtime: WppRuntime = createUnavailableRuntime();
 
-declare global { interface Window { __WHAFLASH_WPP__?: WhatsAppRuntimeProvider; } }
+declare global {
+  interface Window {
+    __WHAFLASH_WPP__?: WppRuntime;
+  }
+}
 
 export function installPageBridge(): void {
   window.addEventListener('message', async (event: MessageEvent) => {
     if (event.source !== window || event.origin !== window.location.origin) return;
     const data = event.data as Partial<BridgeRequest> | undefined;
     if (data?.source !== SOURCE || data.type !== REQUEST_TYPE) return;
+
     const nonce = document.documentElement.dataset.whaflashBridgeNonce;
     if (!nonce || data.nonce !== nonce || !data.requestId || !data.action) return;
 
@@ -31,21 +30,30 @@ export function installPageBridge(): void {
       respond({ source: SOURCE, type: RESPONSE_TYPE, requestId: data.requestId, action: data.action as WhatsAppAction, nonce, error: error instanceof Error ? error.message : 'WhatsApp runtime error' });
     }
   });
+
+  window.__WHAFLASH_WPP__ = runtime;
 }
 
 async function dispatch(action: WhatsAppAction, payload: unknown): Promise<unknown> {
-  const provider = window.__WHAFLASH_WPP__;
-  if (!provider) throw new Error('WhatsApp runtime provider is not ready');
   switch (action) {
-    case 'chats.list': return provider.listChats();
-    case 'contacts.get': return provider.getContact((payload as { id: string }).id);
-    case 'chats.markRead': return provider.markChatRead((payload as { id: string }).id);
-    case 'profile.get': return provider.getProfile();
-    case 'labels.list': return provider.listLabels();
-    case 'media.download': return provider.downloadMedia((payload as { messageId: string }).messageId);
+    case 'chats.list': return runtime.listChats();
+    case 'contacts.get': return runtime.getContact(readId(payload));
+    case 'chats.markRead': return runtime.markChatRead(readId(payload));
+    case 'profile.get': return runtime.getProfile();
+    case 'labels.list': return runtime.listLabels();
+    case 'media.download': return runtime.downloadMedia(readId(payload, 'messageId'));
   }
 }
 
-function respond(response: BridgeResponse): void { window.postMessage(response, window.location.origin); }
+function readId(payload: unknown, key = 'id'): string {
+  if (!payload || typeof payload !== 'object') throw new Error(`Invalid payload: ${key}`);
+  const value = (payload as Record<string, unknown>)[key];
+  if (typeof value !== 'string' || !value) throw new Error(`Invalid payload: ${key}`);
+  return value;
+}
+
+function respond(response: BridgeResponse): void {
+  window.postMessage(response, window.location.origin);
+}
 
 installPageBridge();
