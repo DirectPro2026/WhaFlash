@@ -1,6 +1,6 @@
 {
   "name": "whaflash-modern",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -17,6 +17,9 @@
     "zustand": "latest"
   },
   "devDependencies": {
-    "@types/chrome": "latest"
+    "@types/chrome": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest"
   }
 }
