@@ -1,5 +1,5 @@
 import type { BridgeRequest, BridgeResponse, WhatsAppAction } from '../core/whatsapp/protocol';
-import { createUnavailableRuntime, type WppRuntime } from './runtime-provider';
+import { createUnavailableRuntime, createWhatsAppRuntime, type WppRuntime } from './runtime-provider';
 
 const SOURCE = 'whaflash-modern' as const;
 const REQUEST_TYPE = 'WHATSAPP_REQUEST' as const;
@@ -23,6 +23,7 @@ export function installPageBridge(): void {
     if (!nonce || data.nonce !== nonce || !data.requestId || !data.action) return;
 
     try {
+      refreshRuntime();
       const result = await dispatch(data.action as WhatsAppAction, data.payload);
       respond({ source: SOURCE, type: RESPONSE_TYPE, requestId: data.requestId, action: data.action as WhatsAppAction, nonce, result });
     } catch (error) {
@@ -30,6 +31,12 @@ export function installPageBridge(): void {
     }
   });
 
+  refreshRuntime();
+}
+
+function refreshRuntime(): void {
+  const detected = createWhatsAppRuntime();
+  if (detected.isReady() || !runtime.isReady()) runtime = detected;
   window.__WHAFLASH_WPP__ = runtime;
 }
 
