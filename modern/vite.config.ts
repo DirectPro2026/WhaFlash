@@ -13,6 +13,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         content: resolve(root, 'src/content/index.ts'),
+        pageBridge: resolve(root, 'src/content/page-bridge.ts'),
         background: resolve(root, 'src/background/index.ts'),
         app: resolve(root, 'src/ui/index.html')
       },
