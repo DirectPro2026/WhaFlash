@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { syncWhatsAppContacts } from '../core/crm/contactSync';
+import { downloadContactsCsv } from '../core/crm/exportCsv';
 import { filterContacts } from '../core/crm/pipeline';
 import { whatsappApi } from '../messaging/whatsappClient';
 import { useCrmStore } from '../storage/crmStore';
@@ -74,6 +75,11 @@ export function App() {
     }
   }
 
+  function exportContacts() {
+    downloadContactsCsv(contacts);
+    setMessage(`${contacts.length} contato(s) exportado(s) em CSV.`);
+  }
+
   const visibleContacts = React.useMemo(() => filterContacts(contacts, query), [contacts, query]);
   const selected = contacts.find((c) => c.id === selectedContactId);
   const totalValue = contacts.reduce((sum, contact) => sum + (contact.value ?? 0), 0);
@@ -85,6 +91,7 @@ export function App() {
       <div className="actions">
         <button onClick={() => void refresh()} disabled={busy}>{busy ? 'Processando…' : 'Atualizar'}</button>
         <button onClick={() => void sync()} disabled={busy || !ready}>Sincronizar contatos</button>
+        <button className="ghost" onClick={exportContacts} disabled={!contacts.length}>Exportar CSV</button>
       </div>
     </header>
 
