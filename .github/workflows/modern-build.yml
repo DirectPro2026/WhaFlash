@@ -25,3 +25,11 @@ jobs:
       - run: npm install
       - run: npm run typecheck
       - run: npm run build
+      - name: Package extension
+        run: zip -r whaflash-modern-test.zip dist
+      - name: Upload extension artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: whaflash-modern-test
+          path: modern/whaflash-modern-test.zip
+          if-no-files-found: error
