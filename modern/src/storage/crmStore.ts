@@ -13,6 +13,8 @@ const initialState: CrmState = {
 
 interface CrmStore extends CrmState {
   upsertContact: (contact: Contact) => void;
+  updateContact: (id: string, patch: Partial<Omit<Contact, 'id' | 'updatedAt'>>) => void;
+  moveContact: (id: string, stageId: string) => void;
   selectContact: (id?: string) => void;
   load: () => Promise<void>;
   persist: () => Promise<void>;
@@ -27,6 +29,14 @@ export const useCrmStore = create<CrmStore>((set, get) => ({
       const exists = state.contacts.some((item) => item.id === contact.id);
       return { contacts: exists ? state.contacts.map((item) => item.id === contact.id ? contact : item) : [...state.contacts, contact] };
     });
+    void get().persist();
+  },
+  updateContact: (id, patch) => {
+    set((state) => ({ contacts: state.contacts.map((contact) => contact.id === id ? { ...contact, ...patch, updatedAt: Date.now() } : contact) }));
+    void get().persist();
+  },
+  moveContact: (id, stageId) => {
+    set((state) => ({ contacts: state.contacts.map((contact) => contact.id === id ? { ...contact, stageId, updatedAt: Date.now() } : contact) }));
     void get().persist();
   },
   selectContact: (id) => set({ selectedContactId: id }),
