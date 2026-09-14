@@ -1,6 +1,7 @@
 import type { ChatId, ChatSummary, Contact, ContactId, Label, WhatsAppProfile } from '../types';
 
 export type WhatsAppAction =
+  | 'runtime.status'
   | 'chats.list'
   | 'contacts.get'
   | 'chats.markRead'
@@ -9,6 +10,7 @@ export type WhatsAppAction =
   | 'media.download';
 
 export interface WhatsAppActionPayloads {
+  'runtime.status': Record<string, never>;
   'chats.list': Record<string, never>;
   'contacts.get': { id: ContactId };
   'chats.markRead': { id: ChatId };
@@ -18,6 +20,7 @@ export interface WhatsAppActionPayloads {
 }
 
 export interface WhatsAppActionResults {
+  'runtime.status': { ready: boolean; provider: string };
   'chats.list': ChatSummary[];
   'contacts.get': Contact | null;
   'chats.markRead': void;
