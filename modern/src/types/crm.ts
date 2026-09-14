@@ -12,6 +12,7 @@ export interface Contact {
   notes?: string;
   labels: string[];
   value?: number;
+  stageId?: string;
   updatedAt: number;
 }
 
