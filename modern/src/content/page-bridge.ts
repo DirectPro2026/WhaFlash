@@ -1,12 +1,11 @@
 import type { BridgeRequest, BridgeResponse, WhatsAppAction } from '../core/whatsapp/protocol';
-import type { ChatSummary, Contact, Label, WhatsAppProfile } from '../core/types';
 import { createUnavailableRuntime, type WppRuntime } from './runtime-provider';
 
 const SOURCE = 'whaflash-modern' as const;
 const REQUEST_TYPE = 'WHATSAPP_REQUEST' as const;
 const RESPONSE_TYPE = 'WHATSAPP_RESPONSE' as const;
 
-const runtime: WppRuntime = createUnavailableRuntime();
+let runtime: WppRuntime = createUnavailableRuntime();
 
 declare global {
   interface Window {
@@ -36,6 +35,7 @@ export function installPageBridge(): void {
 
 async function dispatch(action: WhatsAppAction, payload: unknown): Promise<unknown> {
   switch (action) {
+    case 'runtime.status': return { ready: runtime.isReady(), provider: runtime.providerName() };
     case 'chats.list': return runtime.listChats();
     case 'contacts.get': return runtime.getContact(readId(payload));
     case 'chats.markRead': return runtime.markChatRead(readId(payload));
