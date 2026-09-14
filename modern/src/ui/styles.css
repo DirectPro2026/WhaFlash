@@ -1,0 +1,14 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #f5f7fb; color: #18202a; }
+.app { width: min(1100px, 100%); margin: 0 auto; padding: 28px; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+header div { display: grid; gap: 4px; }
+header strong { font-size: 24px; }
+header span, small { color: #687385; }
+button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid article, .panel { background: white; border: 1px solid #e5e9ef; border-radius: 14px; padding: 18px; }
+.grid article { display: grid; gap: 8px; }
+.grid b { font-size: 22px; }
+.panel { margin-top: 16px; }
+.contact { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid #edf0f4; }
