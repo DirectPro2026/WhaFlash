@@ -4,6 +4,7 @@ button, input, textarea, select { font: inherit; }
 button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; background: #18202a; color: white; }
 button:disabled { cursor: not-allowed; opacity: .55; }
 button.ghost { background: #eef1f5; color: #273241; }
+button.compact { padding: 7px 10px; font-size: 12px; }
 .app { width: min(1240px, 100%); margin: 0 auto; padding: 28px; }
 header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; }
 header div { display: grid; gap: 4px; } header strong { font-size: 24px; } header span, small { color: #687385; }
@@ -16,6 +17,10 @@ header div { display: grid; gap: 4px; } header strong { font-size: 24px; } heade
 .section-heading h2 { margin-bottom: 4px; }
 .error, .success { margin-top: 16px; padding: 12px 14px; border-radius: 10px; }
 .error { background: #fff1f0; } .success { background: #eefbf4; }
+
+.connection { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.connection div { display: grid; gap: 5px; }
+.connection > strong { font-size: 15px; }
 
 .search-panel { display: grid; gap: 8px; }
 .search-field { display: grid; gap: 7px; color: #536072; font-size: 13px; font-weight: 600; }
@@ -48,8 +53,9 @@ header div { display: grid; gap: 4px; } header strong { font-size: 24px; } heade
 .editor textarea { resize: vertical; }
 .editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
 
-.contact { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px 0; border-top: 1px solid #edf0f4; background: transparent; border-radius: 0; text-align: left; color: inherit; }
+.contact-row { display: flex; align-items: center; gap: 8px; border-top: 1px solid #edf0f4; }
+.contact { display: flex; justify-content: space-between; align-items: center; flex: 1; min-width: 0; padding: 12px 0; background: transparent; border-radius: 0; text-align: left; color: inherit; }
 .contact:hover { background: #f5f7fb; }
 .selected-summary { display: none; }
 @media (max-width: 900px) { .kanban { grid-template-columns: repeat(4, minmax(250px, 1fr)); } }
-@media (max-width: 700px) { header, .actions { align-items: stretch; flex-direction: column; } .grid { grid-template-columns: 1fr; } .app { padding: 16px; } .form-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { header, .actions { align-items: stretch; flex-direction: column; } .grid { grid-template-columns: 1fr; } .app { padding: 16px; } .form-grid { grid-template-columns: 1fr; } .connection { align-items: flex-start; flex-direction: column; } }
