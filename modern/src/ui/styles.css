@@ -1,8 +1,10 @@
 * { box-sizing: border-box; }
-body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #f5f7fb; color: #18202a; }
-button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; }
+body { margin: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f7fb; color: #18202a; }
+button, input, textarea, select { font: inherit; }
+button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; background: #18202a; color: white; }
 button:disabled { cursor: not-allowed; opacity: .55; }
-.app { width: min(1100px, 100%); margin: 0 auto; padding: 28px; }
+button.ghost { background: #eef1f5; color: #273241; }
+.app { width: min(1240px, 100%); margin: 0 auto; padding: 28px; }
 header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; }
 header div { display: grid; gap: 4px; } header strong { font-size: 24px; } header span, small { color: #687385; }
 .actions { display: flex; gap: 8px; }
@@ -10,9 +12,39 @@ header div { display: grid; gap: 4px; } header strong { font-size: 24px; } heade
 .grid article, .panel { background: white; border: 1px solid #e5e9ef; border-radius: 14px; padding: 18px; }
 .grid article { display: grid; gap: 8px; } .grid b { font-size: 22px; }
 .panel { margin-top: 16px; } .panel h2 { margin-top: 0; }
-.contact { display: flex; justify-content: space-between; width: 100%; padding: 12px 0; border-top: 1px solid #edf0f4; background: transparent; border-radius: 0; text-align: left; }
-.contact-button { color: inherit; } .contact-button:hover, .contact-button.selected { background: #f5f7fb; }
+.section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 14px; }
+.section-heading h2 { margin-bottom: 4px; }
 .error, .success { margin-top: 16px; padding: 12px 14px; border-radius: 10px; }
 .error { background: #fff1f0; } .success { background: #eefbf4; }
-.details dl { display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; margin: 0; } .details dt { color: #687385; } .details dd { margin: 0; }
-@media (max-width: 700px) { header, .actions { align-items: stretch; flex-direction: column; } .grid { grid-template-columns: 1fr; } .app { padding: 16px; } }
+
+.funnel { overflow: hidden; }
+.kanban { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 4px; }
+.kanban-column { min-height: 300px; padding: 12px; background: #f6f8fb; border: 1px solid #e4e8ee; border-radius: 12px; }
+.kanban-column.unassigned { background: #fafafa; }
+.column-header { display: flex; justify-content: space-between; gap: 12px; padding: 4px 2px 12px; }
+.column-header span { display: grid; gap: 3px; }
+.column-header strong { white-space: nowrap; font-size: 13px; }
+.kanban-cards { display: grid; gap: 10px; }
+.kanban-card { display: grid; gap: 7px; padding: 13px; background: white; border: 1px solid #e1e6ed; border-radius: 11px; box-shadow: 0 2px 5px rgba(24,32,42,.04); cursor: grab; }
+.kanban-card:active { cursor: grabbing; }
+.kanban-card:hover { border-color: #cbd3de; }
+.kanban-card > strong { font-size: 14px; }
+.kanban-card select { width: 100%; padding: 7px 8px; border: 1px solid #d8dee7; border-radius: 8px; background: white; color: #273241; }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tag { padding: 3px 7px; border-radius: 999px; background: #eef1f5; color: #536072; font-size: 11px; }
+
+.editor-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
+.editor-heading h2 { margin: 2px 0 0; }
+.editor form { display: grid; gap: 12px; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.editor label { display: grid; gap: 6px; color: #536072; font-size: 13px; font-weight: 600; }
+.editor input, .editor textarea { width: 100%; border: 1px solid #d8dee7; border-radius: 9px; padding: 10px 11px; color: #18202a; background: white; outline: none; }
+.editor input:focus, .editor textarea:focus { border-color: #8d99a8; box-shadow: 0 0 0 3px rgba(100,116,139,.1); }
+.editor textarea { resize: vertical; }
+.editor-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+
+.contact { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 12px 0; border-top: 1px solid #edf0f4; background: transparent; border-radius: 0; text-align: left; color: inherit; }
+.contact:hover { background: #f5f7fb; }
+.selected-summary { display: none; }
+@media (max-width: 900px) { .kanban { grid-template-columns: repeat(4, minmax(250px, 1fr)); } }
+@media (max-width: 700px) { header, .actions { align-items: stretch; flex-direction: column; } .grid { grid-template-columns: 1fr; } .app { padding: 16px; } .form-grid { grid-template-columns: 1fr; } }
