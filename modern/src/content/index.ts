@@ -1,5 +1,5 @@
 import { WhatsAppWebAdapter } from '../core/whatsapp/adapter';
-import type { WhatsAppAction, WhatsAppActionPayloads } from '../core/whatsapp/protocol';
+import type { WhatsAppAction } from '../core/whatsapp/protocol';
 
 const nonce = crypto.randomUUID();
 document.documentElement.dataset.whaflashBridgeNonce = nonce;
@@ -38,7 +38,7 @@ async function execute(action: WhatsAppAction, payload: unknown): Promise<unknow
 
 function readId(payload: unknown, key = 'id'): string {
   if (!payload || typeof payload !== 'object') throw new Error(`Invalid payload: ${key}`);
-  const value = (payload as Partial<Record<keyof WhatsAppActionPayloads[Exclude<WhatsAppAction, 'runtime.status' | 'chats.list' | 'profile.get' | 'labels.list'>], unknown>>)[key as 'id' | 'messageId'];
+  const value = (payload as Record<string, unknown>)[key];
   if (typeof value !== 'string' || !value.trim()) throw new Error(`Invalid payload: ${key}`);
   return value;
 }
