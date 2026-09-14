@@ -17,17 +17,28 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
-async function execute<A extends WhatsAppAction>(action: A, payload: WhatsAppActionPayloads[A]): Promise<unknown> {
-  if (action === 'runtime.status') {
-    return adapter.requestStatus();
-  }
-  adapter.setReady(true);
+async function execute(action: WhatsAppAction, payload: unknown): Promise<unknown> {
   switch (action) {
-    case 'chats.list': return adapter.getChats();
-    case 'contacts.get': return adapter.getContact(payload.id);
-    case 'chats.markRead': return adapter.markChatRead(payload.id);
-    case 'profile.get': return adapter.getProfile();
-    case 'labels.list': return adapter.getLabels();
-    case 'media.download': return adapter.downloadMedia(payload.messageId);
+    case 'runtime.status':
+      return adapter.requestStatus();
+    case 'chats.list':
+      return adapter.getChats();
+    case 'contacts.get':
+      return adapter.getContact(readId(payload));
+    case 'chats.markRead':
+      return adapter.markChatRead(readId(payload));
+    case 'profile.get':
+      return adapter.getProfile();
+    case 'labels.list':
+      return adapter.getLabels();
+    case 'media.download':
+      return adapter.downloadMedia(readId(payload, 'messageId'));
   }
+}
+
+function readId(payload: unknown, key = 'id'): string {
+  if (!payload || typeof payload !== 'object') throw new Error(`Invalid payload: ${key}`);
+  const value = (payload as Partial<Record<keyof WhatsAppActionPayloads[Exclude<WhatsAppAction, 'runtime.status' | 'chats.list' | 'profile.get' | 'labels.list'>], unknown>>)[key as 'id' | 'messageId'];
+  if (typeof value !== 'string' || !value.trim()) throw new Error(`Invalid payload: ${key}`);
+  return value;
 }
