@@ -20,5 +20,5 @@
       "world": "ISOLATED"
     }
   ],
-  "action": { "default_title": "WhaFlash", "default_popup": "assets/app.html" }
+  "action": { "default_title": "WhaFlash", "default_popup": "app.html" }
 }
