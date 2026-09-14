@@ -1,9 +1,11 @@
-import { BrowserWhatsAppAdapter } from './whatsappAdapter';
+import { WhatsAppWebAdapter } from '../core/whatsapp/adapter';
 
-const adapter = new BrowserWhatsAppAdapter();
+const nonce = crypto.randomUUID();
+document.documentElement.dataset.whaflashBridgeNonce = nonce;
 
-void adapter.listChats().then((chats) => {
-  window.dispatchEvent(new CustomEvent('whaflash:ready', { detail: { chatCount: chats.length } }));
-});
+const adapter = new WhatsAppWebAdapter({ nonce });
+adapter.setReady(true);
 
-console.info('[WhaFlash] modern content layer initialized');
+window.dispatchEvent(new CustomEvent('whaflash-modern-ready', { detail: { adapter } }));
+
+console.info('[WhaFlash Modern] content layer initialized');
