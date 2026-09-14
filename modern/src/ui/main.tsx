@@ -35,7 +35,7 @@ function Dashboard() {
     setBusy(true); setError(null); setSyncMessage(null);
     try {
       const report = await syncWhatsAppContacts(
-        { getChats: whatsappApi.listChats, getContact: whatsappApi.getContact } as never,
+        { getChats: whatsappApi.listChats, getContact: whatsappApi.getContact },
         { upsertContact },
       );
       setSyncMessage(`${report.synced} contato(s) sincronizado(s). ${report.skippedGroups} grupo(s) ignorado(s).`);
