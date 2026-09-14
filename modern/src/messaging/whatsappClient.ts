@@ -18,6 +18,7 @@ export async function whatsappRequest<A extends WhatsAppAction>(
 }
 
 export const whatsappApi = {
+  getRuntimeStatus: () => whatsappRequest('runtime.status', {}),
   listChats: () => whatsappRequest('chats.list', {}) as Promise<ChatSummary[]>,
   getContact: (id: string) => whatsappRequest('contacts.get', { id }) as Promise<Contact | null>,
   markChatRead: (id: string) => whatsappRequest('chats.markRead', { id }) as Promise<void>,
