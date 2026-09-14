@@ -17,6 +17,11 @@ header div { display: grid; gap: 4px; } header strong { font-size: 24px; } heade
 .error, .success { margin-top: 16px; padding: 12px 14px; border-radius: 10px; }
 .error { background: #fff1f0; } .success { background: #eefbf4; }
 
+.search-panel { display: grid; gap: 8px; }
+.search-field { display: grid; gap: 7px; color: #536072; font-size: 13px; font-weight: 600; }
+.search-field input { width: 100%; border: 1px solid #d8dee7; border-radius: 9px; padding: 11px 12px; color: #18202a; background: white; outline: none; }
+.search-field input:focus { border-color: #8d99a8; box-shadow: 0 0 0 3px rgba(100,116,139,.1); }
+
 .funnel { overflow: hidden; }
 .kanban { display: grid; grid-template-columns: repeat(4, minmax(220px, 1fr)); gap: 12px; overflow-x: auto; padding-bottom: 4px; }
 .kanban-column { min-height: 300px; padding: 12px; background: #f6f8fb; border: 1px solid #e4e8ee; border-radius: 12px; }
