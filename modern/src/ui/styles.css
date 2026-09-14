@@ -1,0 +1,29 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Inter, system-ui, sans-serif; background: #f5f7fb; color: #18202a; }
+button { border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; font-weight: 600; }
+button:disabled { cursor: not-allowed; opacity: .55; }
+input, select, textarea { width: 100%; border: 1px solid #d9dee7; border-radius: 9px; padding: 10px 11px; font: inherit; background: white; color: inherit; }
+textarea { resize: vertical; min-height: 110px; }
+input:focus, select:focus, textarea:focus { outline: 2px solid #cbd8ff; border-color: #8098ee; }
+label { display: grid; gap: 6px; color: #46505e; font-size: 13px; font-weight: 600; }
+.app { width: min(1100px, 100%); margin: 0 auto; padding: 28px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 24px; }
+header div { display: grid; gap: 4px; } header strong { font-size: 24px; } header span, small { color: #687385; }
+.actions { display: flex; gap: 8px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.grid article, .panel { background: white; border: 1px solid #e5e9ef; border-radius: 14px; padding: 18px; }
+.grid article { display: grid; gap: 8px; } .grid b { font-size: 22px; }
+.panel { margin-top: 16px; } .panel h2 { margin-top: 0; }
+.contact { display: flex; justify-content: space-between; width: 100%; padding: 12px 0; border-top: 1px solid #edf0f4; background: transparent; border-radius: 0; text-align: left; }
+.contact-button { color: inherit; } .contact-button:hover, .contact-button.selected { background: #f5f7fb; }
+.contact-button span { display: grid; gap: 3px; }
+.error, .success { margin-top: 16px; padding: 12px 14px; border-radius: 10px; }
+.error { background: #fff1f0; } .success { background: #eefbf4; }
+.editor { display: grid; gap: 16px; }
+.editor-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.editor-header h2 { margin: 0 0 4px; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 24px; }
+.tag { padding: 5px 9px; border-radius: 999px; background: #eef2ff; color: #364a93; font-size: 12px; }
+.tag:hover { opacity: .8; }
+@media (max-width: 700px) { header, .actions, .editor-header { align-items: stretch; flex-direction: column; } .grid, .form-grid { grid-template-columns: 1fr; } .app { padding: 16px; } }
