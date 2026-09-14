@@ -6,7 +6,7 @@ import { whatsappApi } from '../messaging/whatsappClient';
 import { useCrmStore } from '../storage/crmStore';
 import { Kanban } from './Kanban';
 import { ContactEditor } from './ContactEditor';
-import type { ChatSummary } from '../core/types';
+import type { ChatSummary, Label, WhatsAppProfile } from '../core/types';
 import './styles.css';
 
 export function App() {
@@ -19,6 +19,8 @@ export function App() {
   const selectContact = useCrmStore((s) => s.selectContact);
   const selectedContactId = useCrmStore((s) => s.selectedContactId);
   const [chats, setChats] = React.useState<ChatSummary[]>([]);
+  const [labels, setLabels] = React.useState<Label[]>([]);
+  const [profile, setProfile] = React.useState<WhatsAppProfile | null>(null);
   const [ready, setReady] = React.useState(false);
   const [busy, setBusy] = React.useState(false);
   const [query, setQuery] = React.useState('');
@@ -32,7 +34,18 @@ export function App() {
     try {
       const status = await whatsappApi.getRuntimeStatus();
       setReady(status.ready);
-      if (status.ready) setChats(await whatsappApi.listChats());
+      if (!status.ready) {
+        setChats([]); setLabels([]); setProfile(null);
+        return;
+      }
+      const [nextChats, nextLabels, nextProfile] = await Promise.all([
+        whatsappApi.listChats(),
+        whatsappApi.listLabels(),
+        whatsappApi.getProfile()
+      ]);
+      setChats(nextChats);
+      setLabels(nextLabels);
+      setProfile(nextProfile);
     } catch (e) {
       setReady(false);
       setError(e instanceof Error ? e.message : 'WhatsApp Web indisponível.');
@@ -52,9 +65,19 @@ export function App() {
     finally { setBusy(false); }
   }
 
+  async function markRead(chat: ChatSummary) {
+    try {
+      await whatsappApi.markChatRead(chat.id);
+      setChats((current) => current.map((item) => item.id === chat.id ? { ...item, unreadCount: 0 } : item));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Não foi possível marcar a conversa como lida.');
+    }
+  }
+
   const visibleContacts = React.useMemo(() => filterContacts(contacts, query), [contacts, query]);
   const selected = contacts.find((c) => c.id === selectedContactId);
   const totalValue = contacts.reduce((sum, contact) => sum + (contact.value ?? 0), 0);
+  const labelNames = React.useMemo(() => new Map(labels.map((label) => [label.id, label.name])), [labels]);
 
   return <main className="app">
     <header>
@@ -74,6 +97,11 @@ export function App() {
     {error && <div className="error" role="alert">{error}</div>}
     {message && <div className="success" role="status">{message}</div>}
 
+    <section className="panel connection">
+      <div><small>WhatsApp conectado</small><strong>{ready ? (profile?.name || 'Sessão ativa') : 'Aguardando WhatsApp Web'}</strong></div>
+      <span>{ready ? `${labels.length} etiqueta(s) disponível(is)` : 'Abra web.whatsapp.com para conectar'}</span>
+    </section>
+
     <section className="panel search-panel">
       <label className="search-field">
         <span>Pesquisar contatos</span>
@@ -87,6 +115,7 @@ export function App() {
       stages={stages}
       onSelect={selectContact}
       onMove={(id, stageId) => { moveContact(id, stageId); setMessage('Contato movido no funil.'); }}
+      labelNames={labelNames}
     />
 
     {selected && <ContactEditor
@@ -99,9 +128,12 @@ export function App() {
       <div className="section-heading"><div><h2>Conversas recentes</h2><small>Dados vindos do WhatsApp Web conectado.</small></div></div>
       {chats.length === 0
         ? <p>{ready ? 'Nenhuma conversa retornada.' : 'Abra o WhatsApp Web para conectar.'}</p>
-        : chats.slice(0, 20).map((chat) => <button className="contact" key={chat.id} onClick={() => selectContact(chat.id)}>
-            <span>{chat.name}</span><small>{chat.unreadCount} não lidas</small>
-          </button>)}
+        : chats.slice(0, 20).map((chat) => <div className="contact-row" key={chat.id}>
+            <button className="contact" onClick={() => selectContact(chat.id)}>
+              <span>{chat.name}</span><small>{chat.unreadCount} não lidas</small>
+            </button>
+            {chat.unreadCount > 0 && <button className="ghost compact" onClick={() => void markRead(chat)}>Marcar lida</button>}
+          </div>)}
     </section>
   </main>;
 }
