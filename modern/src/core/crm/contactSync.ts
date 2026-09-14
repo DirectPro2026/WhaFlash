@@ -5,23 +5,38 @@ export interface ContactRepository {
   upsertContact(contact: CrmContact): void;
 }
 
+export interface SyncReport {
+  discovered: number;
+  synced: number;
+  skippedGroups: number;
+  missingContacts: number;
+}
+
 /**
- * Keeps WhatsApp transport concerns out of the CRM store.
- * Only fields already exposed by the WhatsApp adapter are synchronized.
+ * Synchronizes the normalized WhatsApp contact surface into the local CRM.
+ * It intentionally does not send CRM-only fields back to WhatsApp or any
+ * external service.
  */
 export async function syncWhatsAppContacts(
   adapter: WhatsAppAdapter,
   repository: ContactRepository,
-): Promise<number> {
+): Promise<SyncReport> {
   const chats = await adapter.getChats();
-  let synced = 0;
+  const report: SyncReport = { discovered: chats.length, synced: 0, skippedGroups: 0, missingContacts: 0 };
 
   for (const chat of chats) {
-    if (!chat.id || chat.isGroup) continue;
-    const contact = await adapter.getContact(chat.id);
-    if (!contact) continue;
+    if (!chat.id || chat.isGroup) {
+      if (chat.isGroup) report.skippedGroups += 1;
+      continue;
+    }
 
-    repository.upsertContact({
+    const contact = await adapter.getContact(chat.id);
+    if (!contact) {
+      report.missingContacts += 1;
+      continue;
+    }
+
+    const crmContact: CrmContact = {
       id: contact.id,
       name: contact.name || chat.name,
       phone: contact.phone ?? '',
@@ -30,9 +45,11 @@ export async function syncWhatsAppContacts(
       notes: contact.notes,
       labels: contact.labels,
       updatedAt: Date.now(),
-    });
-    synced += 1;
+    };
+
+    repository.upsertContact(crmContact);
+    report.synced += 1;
   }
 
-  return synced;
+  return report;
 }
