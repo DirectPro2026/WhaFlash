@@ -6,22 +6,19 @@ export async function whatsappRequest<A extends WhatsAppAction>(
   payload: WhatsAppActionPayloads[A],
 ): Promise<WhatsAppActionResults[A]> {
   const requestId = crypto.randomUUID();
-  const response = await chrome.runtime.sendMessage({
-    type: 'WHATSAPP_REQUEST',
-    requestId,
-    action,
-    payload,
-  });
-
+  const response = await chrome.runtime.sendMessage({ type: 'WHATSAPP_REQUEST', requestId, action, payload });
   if (!response?.ok) throw new Error(response?.error ?? 'WhatsApp request failed');
   return response.data as WhatsAppActionResults[A];
 }
 
 export const whatsappApi = {
   getRuntimeStatus: () => whatsappRequest('runtime.status', {}),
-  listChats: () => whatsappRequest('chats.list', {}) as Promise<ChatSummary[]>,
-  getContact: (id: string) => whatsappRequest('contacts.get', { id }) as Promise<Contact | null>,
-  markChatRead: (id: string) => whatsappRequest('chats.markRead', { id }) as Promise<void>,
-  getProfile: () => whatsappRequest('profile.get', {}) as Promise<WhatsAppProfile>,
-  listLabels: () => whatsappRequest('labels.list', {}) as Promise<Label[]>,
+  listChats: () => whatsappRequest('chats.list', {}),
+  getContact: (id: string) => whatsappRequest('contacts.get', { id }),
+  markChatRead: (id: string) => whatsappRequest('chats.markRead', { id }),
+  getProfile: () => whatsappRequest('profile.get', {}),
+  listLabels: () => whatsappRequest('labels.list', {}),
+  downloadMedia: (messageId: string) => whatsappRequest('media.download', { messageId }),
 };
+
+export type { ChatSummary, Contact, Label, WhatsAppProfile };
