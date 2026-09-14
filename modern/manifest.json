@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "WhaFlash Modern",
+  "version": "0.1.0",
+  "description": "CRM moderno e modular para WhatsApp Web.",
+  "background": { "service_worker": "assets/background.js", "type": "module" },
+  "permissions": ["storage", "alarms", "tabs"],
+  "host_permissions": ["https://web.whatsapp.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["assets/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_title": "WhaFlash" }
+}
