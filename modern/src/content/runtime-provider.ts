@@ -7,6 +7,7 @@ import type { ChatSummary, Contact, Label, WhatsAppProfile } from '../core/types
  * WhatsApp runtime changes, only this provider should need maintenance.
  */
 export interface WppRuntime {
+  providerName(): string;
   isReady(): boolean;
   listChats(): Promise<ChatSummary[]>;
   getContact(id: string): Promise<Contact | null>;
@@ -22,6 +23,7 @@ export function createUnavailableRuntime(): WppRuntime {
   };
 
   return {
+    providerName: () => 'unavailable',
     isReady: () => false,
     listChats: unavailable,
     getContact: unavailable,
