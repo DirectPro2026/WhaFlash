@@ -1,0 +1,81 @@
+name: Descompactar extensão WhaFlash
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  descompactar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Descompactar extensão
+        shell: bash
+        run: |
+          set -e
+
+          ZIP_FILE="ghbmnnjooekpmoecnnnilnnbdlolhkhi.zip"
+
+          if [ ! -f "$ZIP_FILE" ]; then
+            echo "ZIP não encontrado: $ZIP_FILE"
+            exit 1
+          fi
+
+          echo "Descompactando $ZIP_FILE..."
+
+          mkdir -p extracted
+          unzip -o "$ZIP_FILE" -d extracted
+
+          # Se o ZIP tiver uma única pasta na raiz,
+          # move o conteúdo dessa pasta para a raiz do repositório.
+          ITEMS=(extracted/*)
+
+          if [ "${#ITEMS[@]}" -eq 1 ] && [ -d "${ITEMS[0]}" ]; then
+            echo "Encontrada pasta interna: ${ITEMS[0]}"
+            cp -a "${ITEMS[0]}"/. .
+          else
+            cp -a extracted/. .
+          fi
+
+          rm -rf extracted
+          rm -f "$ZIP_FILE"
+
+          echo "Extensão descompactada com sucesso."
+
+      - name: Verificar extensão
+        shell: bash
+        run: |
+          if [ ! -f "manifest.json" ]; then
+            echo "ERRO: manifest.json não encontrado."
+            exit 1
+          fi
+
+          echo "manifest.json encontrado."
+          echo "Arquivos da extensão:"
+          find . -maxdepth 3 -type f \
+            ! -path './.git/*' \
+            | sort
+
+      - name: Salvar arquivos no GitHub
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "Nenhuma alteração para salvar."
+            exit 0
+          fi
+
+          git commit -m "Descompactar extensão WhaFlash [skip ci]"
+          git push
